@@ -1,7 +1,9 @@
 {
-  "name": "configs-profiler",
+	"name": "configs-profiler",
 	"displayName": "Configs Profiler",
 	"description": "Profiles your configs",
+	"author": "framemuse",
+	"publisher": "FrameMuse",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.59.0"
@@ -10,7 +12,7 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:configs-profiler.helloWorld"
+		"onCommand:configs-profiler.helloWorld"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
