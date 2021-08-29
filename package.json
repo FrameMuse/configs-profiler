@@ -4,7 +4,7 @@
 	"description": "Profiles your configs",
 	"author": "framemuse",
 	"publisher": "FrameMuse",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.59.0"
 	},
