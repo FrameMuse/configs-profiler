@@ -11,15 +11,21 @@
 	"categories": [
 		"Other"
 	],
-	"activationEvents": [
-		"onCommand:configs-profiler.helloWorld"
-	],
 	"main": "./out/extension.js",
+	"activationEvents": [
+		"onLanguage:typescript",
+		"onCommand:configs-profiler.saveProfile",
+		"onCommand:configs-profiler.loadProfile"
+	],
 	"contributes": {
 		"commands": [
 			{
-				"command": "configs-profiler.helloWorld",
-				"title": "Hello World"
+				"command": "configs-profiler.saveProfile",
+				"title": "Save Profile"
+			},
+			{
+				"command": "configs-profiler.loadProfile",
+				"title": "Load Profile"
 			}
 		]
 	},

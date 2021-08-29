@@ -1,26 +1,64 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import { env } from "process"
+import { commands, ExtensionContext, Position, Uri, window, workspace, WorkspaceEdit } from "vscode"
+import { askEnteringProfileName, askPickingFileUris, readDocument } from "./helpers"
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "configs-profiler" is now active!');
+type Profiles = Record<string, string[]>
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('configs-profiler.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Configs Profiler!');
-	});
+export function activate(context: ExtensionContext) {
+	context.globalState.setKeysForSync(["profiles"])
+	const getProfiles = () => context.globalState.get<Profiles>("profiles")
 
-	context.subscriptions.push(disposable);
+	async function saveProfile() {
+		const profileName = await askEnteringProfileName()
+		const fileUris = await askPickingFileUris()
+
+		await context.globalState.update("profiles", {
+			...getProfiles(),
+			[profileName.toLowerCase()]: fileUris?.map(readDocument)
+		})
+
+		window.showInformationMessage(`Profile "${profileName}" saved`)
+	}
+
+	async function loadProfile() {
+		const profiles = getProfiles() || {}
+		const profileKeys = Object.keys(profiles).map(key => key.toUpperCase())
+
+		if (profileKeys.length === 0) {
+			window.showErrorMessage("No profiles to load")
+			return
+		}
+
+		const profile = (await window.showQuickPick(profileKeys))?.toLowerCase()
+
+		if (profile && profiles) {
+			const configs = profiles[profile]
+
+			await commands.executeCommand("copyFilePath")
+			const folder = await env?.clipboard || workspace.workspaceFolders?.[0].uri
+			const workSpaceEdit = new WorkspaceEdit
+
+			let a = 0
+			console.log(configs);
+
+			configs.forEach(async config => {
+				const uri = await Uri.file(folder + "/" + a++ + ".txt")
+				console.log(uri, config)
+
+				workSpaceEdit.createFile(uri, {
+					// ignoreIfExists: true,
+					overwrite: true
+				})
+				workSpaceEdit.insert(uri, new Position(0, 0), config)
+			})
+		}
+	}
+
+	context.subscriptions.push(
+		commands.registerCommand('configs-profiler.saveProfile', saveProfile),
+		commands.registerCommand('configs-profiler.loadProfile', loadProfile),
+	)
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
